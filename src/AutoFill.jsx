@@ -1,31 +1,53 @@
 import { useState } from "react";
 import { cities } from "./cities";
 import styles from "./AutoFill.module.css";
+
 function AutoFill() {
   const [inputSearch, setInputSearch] = useState("");
-  const searchHandler = (e) => {
-    setInputSearch(e.target.value);
+  const [suggestion, setSuggestion] = useState("");
+
+  const handleChange = (e) => {
+    const value = e.target.value;
+    setInputSearch(value);
+
+    const match =
+      value &&
+      cities.find((city) => city.toLowerCase().startsWith(value.toLowerCase()));
+
+    if (match && match.toLowerCase() !== value.toLowerCase()) {
+      setSuggestion(match);
+    } else {
+      setSuggestion("");
+    }
   };
-  const suggestion =
-    inputSearch &&
-    cities.find((city) =>
-      city.toLowerCase().startsWith(inputSearch.toLowerCase())
-    );
-    if(suggestion) console.log(suggestion);
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && suggestion) {
+      setInputSearch(suggestion);
+      setSuggestion("");
+    }
+  };
 
   return (
-    <div>
-      <label htmlFor="" className={styles.label}>
-        City :
-        <input
-          type="text"
-          className={styles.input}
-          placeholder="Plaese enter your city name ..."
-          onChange={searchHandler}
-          value={inputSearch}
-        />
-      </label>
-      {suggestion && <p className={styles.suggestion}>{suggestion}</p>}
+    <div className={styles.wrapper}>
+      <div className={styles.autocompleteBox}>
+        <span className={styles.typed}>{inputSearch}</span>
+        {suggestion &&
+          suggestion.toLowerCase().startsWith(inputSearch.toLowerCase()) && (
+            <span className={styles.suggested}>
+              {suggestion.slice(inputSearch.length)}
+            </span>
+          )}
+      </div>
+
+      <input
+        type="text"
+        className={styles.input}
+        placeholder="Please enter your city name..."
+        value={inputSearch}
+        onChange={handleChange}
+        onKeyDown={handleKeyDown}
+      />
     </div>
   );
 }
